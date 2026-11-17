@@ -1,0 +1,28 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+enum ProductCategory {
+  Electronics
+  Grocery
+  Stationery
+  Other
+}
+
+model Product {
+  id                String          @id @default(uuid())
+  name              String
+  sku               String
+  skuKey            String          @unique
+  category          ProductCategory
+  costPriceCents    Int
+  sellingPriceCents Int
+  reorderLevel      Int
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
