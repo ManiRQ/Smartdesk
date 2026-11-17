@@ -20,7 +20,12 @@ export function useProductsScreen() {
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const dismissNotice = useCallback(() => setNotice(null), []);
+  const { dismissImportMessage } = catalogue;
+  const dismissNotice = useCallback(() => {
+    setNotice(null);
+    dismissImportMessage();
+  }, [dismissImportMessage]);
+  const visibleNotice = notice ?? catalogue.importMessage;
   const visibleProducts = filterProducts(products, query, category);
 
   function openCreateForm() {
@@ -48,19 +53,19 @@ export function useProductsScreen() {
     setCategory("");
   }
 
-  function handleSave(input: ProductInput): MutationResult {
+  async function handleSave(input: ProductInput): Promise<MutationResult> {
     const editingProduct = formState?.product ?? null;
     const result = editingProduct
-      ? updateProduct(editingProduct.id, input)
-      : addProduct(input);
+      ? await updateProduct(editingProduct.id, input)
+      : await addProduct(input);
     if (result.ok) {
       setNotice(editingProduct ? "Product updated." : "Product added.");
     }
     return result;
   }
 
-  function handleDelete(product: Product): MutationResult {
-    const result = deleteProduct(product.id);
+  async function handleDelete(product: Product): Promise<MutationResult> {
+    const result = await deleteProduct(product.id);
     if (result.ok) {
       setNotice("Product deleted.");
     }
@@ -76,7 +81,7 @@ export function useProductsScreen() {
     visibleProducts,
     formState,
     productToDelete,
-    notice,
+    notice: visibleNotice,
     dismissNotice,
     openCreateForm,
     openEditForm,

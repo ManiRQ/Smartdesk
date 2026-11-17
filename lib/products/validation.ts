@@ -1,3 +1,4 @@
+import type { ValidationIssue } from "@/lib/api/http";
 import {
   isProductCategory,
   type Product,
@@ -32,12 +33,27 @@ export const EMPTY_PRODUCT_FORM: ProductFormValues = {
 };
 
 export const REQUIRED_MESSAGE = "This field is required.";
-const SKU_TAKEN_MESSAGE = "This SKU is already used by another product.";
+export const SKU_TAKEN_MESSAGE = "This SKU is already used by another product.";
 const DECIMAL_PATTERN = /^(\d+\.?\d*|\.\d+)$/;
 const WHOLE_NUMBER_PATTERN = /^\d+$/;
 
 export function normalizeSku(sku: string): string {
   return sku.trim().toUpperCase();
+}
+
+function isFormField(field: string): field is keyof ProductFormValues {
+  return field in EMPTY_PRODUCT_FORM;
+}
+
+// Maps API validation issues onto the form fields they belong to.
+export function issuesToFieldErrors(issues: ValidationIssue[]): ProductFieldErrors {
+  const errors: ProductFieldErrors = {};
+  for (const issue of issues) {
+    if (isFormField(issue.field)) {
+      errors[issue.field] = issue.message;
+    }
+  }
+  return errors;
 }
 
 export function productToFormValues(product: Product): ProductFormValues {

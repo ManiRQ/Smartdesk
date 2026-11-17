@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# prisma (database files and generated client are regenerated or local)
+/prisma/*.db
+/prisma/*.db-journal
+/lib/generated/
+
+# revolte preview runtime (regenerated on each start)
+/.revolte/runtime/
+

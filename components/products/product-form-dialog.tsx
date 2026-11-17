@@ -1,22 +1,16 @@
 "use client";
 
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { ProductFormFields } from "@/components/products/product-form-fields";
 import type { MutationResult } from "@/hooks/use-products";
+import { useProductForm } from "@/hooks/use-product-form";
 import type { Product, ProductInput } from "@/lib/products/model";
-import {
-  EMPTY_PRODUCT_FORM,
-  productToFormValues,
-  type ProductFieldErrors,
-  type ProductFormValues,
-  validateProductForm,
-} from "@/lib/products/validation";
 import { DIALOG_CLASS, PRIMARY_BUTTON, SECONDARY_BUTTON } from "@/lib/styles";
 
 type ProductFormDialogProps = {
   product: Product | null;
   products: readonly Product[];
-  onSave: (input: ProductInput) => MutationResult;
+  onSave: (input: ProductInput) => Promise<MutationResult>;
   onClose: () => void;
 };
 
@@ -27,37 +21,18 @@ export function ProductFormDialog({
   onClose,
 }: ProductFormDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [values, setValues] = useState<ProductFormValues>(() =>
-    product ? productToFormValues(product) : EMPTY_PRODUCT_FORM,
-  );
-  const [errors, setErrors] = useState<ProductFieldErrors>({});
-  const [saveError, setSaveError] = useState("");
   const isEditing = product !== null;
+  const { values, errors, saveError, isSaving, updateField, handleSubmit } =
+    useProductForm({
+      product,
+      products,
+      onSave,
+      onSaved: () => dialogRef.current?.close(),
+    });
 
   useEffect(() => {
     dialogRef.current?.showModal();
   }, []);
-
-  function updateField(field: keyof ProductFormValues, value: string) {
-    setValues((current) => ({ ...current, [field]: value }));
-    setErrors((current) => ({ ...current, [field]: undefined }));
-  }
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSaveError("");
-    const result = validateProductForm(values, products, product?.id ?? null);
-    setErrors(result.errors);
-    if (result.input === null) {
-      return;
-    }
-    const saved = onSave(result.input);
-    if (saved.ok) {
-      dialogRef.current?.close();
-      return;
-    }
-    setSaveError(saved.message);
-  }
 
   return (
     <dialog
@@ -93,8 +68,16 @@ export function ProductFormDialog({
           >
             Cancel
           </button>
-          <button type="submit" className={PRIMARY_BUTTON}>
-            {isEditing ? "Save changes" : "Add product"}
+          <button
+            type="submit"
+            disabled={isSaving}
+            className={PRIMARY_BUTTON}
+          >
+            {isSaving
+              ? "Saving..."
+              : isEditing
+                ? "Save changes"
+                : "Add product"}
           </button>
         </div>
       </form>

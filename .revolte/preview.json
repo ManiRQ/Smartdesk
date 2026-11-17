@@ -8,6 +8,11 @@
       "name": "dependencies",
       "check": "test -d node_modules/next",
       "run": "npm install"
+    },
+    {
+      "name": "database",
+      "check": "test -f prisma/dev.db",
+      "run": "npx prisma migrate deploy"
     }
   ],
   "services": []

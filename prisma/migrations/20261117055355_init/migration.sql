@@ -1,0 +1,16 @@
+-- CreateTable
+CREATE TABLE "Product" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "sku" TEXT NOT NULL,
+    "skuKey" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
+    "costPriceCents" INTEGER NOT NULL,
+    "sellingPriceCents" INTEGER NOT NULL,
+    "reorderLevel" INTEGER NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Product_skuKey_key" ON "Product"("skuKey");
